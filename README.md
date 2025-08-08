@@ -55,6 +55,11 @@ openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program build/Debug/<
 - 无需替换编译链路径，自动寻找
 - 可通过修改 CMakeLists.txt 和 toolchain 文件适配不同芯片和工具链。
 
+## 参考教程链接
+
+- [基于 CMake 的 STM32 工程模板教程（知乎）](https://zhuanlan.zhihu.com/p/576972892)
+- [STM32 CMake 工程配置详解（CSDN）](https://blog.csdn.net/ZZLLLLLLZ/article/details/144541858)
+
 ---
 
 如有问题欢迎提 issue 或 PR。
