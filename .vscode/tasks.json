@@ -1,0 +1,118 @@
+//任务脚本
+{
+    //ctrl+shift+B
+    "tasks": [
+        {
+            //编译
+            "label": "Build",
+            "type": "shell",
+        // type：Task的类型，分为shell和process两种
+        // shell：作为Shell命令运行
+        // process：作为一个进程运行
+            "command": "cmake --preset=Debug ; cmake --build build/Debug --target all",
+            "args": [],
+            "problemMatcher": "$gcc",
+            "group": "build",
+            "detail": "编译源码"
+        },
+        //清除
+        {
+            "type": "shell",
+            "label": "clean",
+            "command": "cmake --build build/Debug --target clean",
+            "args": [],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        //重编译
+        {
+            "type": "shell",
+            "label": "rebuild",
+            "command": "cmake --build build/Debug --target clean;cmake --build build/Debug --target all",
+            "args": [],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "dependsOn": [
+                "clean"
+            ]
+        },
+        //cmsis-dap方式下载
+        {
+            "type": "shell",
+            "label": "flash with cmsis-dap-link",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/stm32f4x.cfg",
+                "-c",
+                "program build/Debug/${workspaceRootFolderName}.elf verify reset",//将工程根目录名称作为可执行文件名称
+                "-c",
+                "reset run",
+                "-c",
+                "exit"
+            ],/*command+args相当于主命令+子命令，也就是openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c "program build/F401CCU6_demo.elf verify reset exit"的效果*/
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "dependsOn": [//每次执行下载任务前，会先执行build任务，这便是所谓的依赖
+                "build"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "flash with ST-link",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/stm32f4x.cfg",
+                "-c",
+                "program build/Debug/${workspaceRootFolderName}.elf verify reset",
+                "-c",
+                "reset run",
+                "-c",
+                "exit"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "dependsOn": [
+                "build"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "flash with J-link",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/jlink-swd.cfg",
+                "-f",
+                "target/stm32f1x.cfg",
+                "-c",
+                "program build/Debug/${workspaceRootFolderName}.elf verify reset",
+                "-c",
+                "reset run",
+                "-c",
+                "exit"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "dependsOn": [
+                "build"
+            ]
+        },
+    ],
+    "version": "2.0.0"
+}

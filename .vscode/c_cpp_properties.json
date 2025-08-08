@@ -1,0 +1,43 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "Core/Inc",
+                "Drivers/STM32F4xx_HAL_Driver/Inc",
+                "Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                "Drivers/CMSIS/Include",
+                //"Middlewares/Third_Party/FreeRTOS/Source/include",
+                "Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"
+                //"Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
+                //"Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
+                //"User"
+            ],
+            "defines": [
+                "STM32F407xx",
+                "_DEBUG",
+                "UNICODE",
+                "USE_HAL_DRIVER",
+                "__GNUC__" // 解决编辑器中提示无法识别uint32_t, uint16_t, uint8_t的问题
+            ],
+                        /*
+            只要设置了系统环境变量，在此处填写arm-none-eabi-gcc即可。
+            VSCode C/C++ IntelliSense插件会自动索引arm-none-eabi-gcc.exe所在路径，故无需在此填写完整路径。
+            */
+           //"compilerPath": "D:/Develop/toolchain/arm-gnu-toolchain-14.3.rel1-mingw-w64-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc.exe",
+            "compilerPath": "arm-none-eabi-gcc",
+            "compilerArgs": [
+                "-mcpu=cortex-m4",
+                "-mthumb",
+                "-mfpu=fpv4-sp-d16",
+                "-mfloat-abi=hard"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "gcc-arm",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

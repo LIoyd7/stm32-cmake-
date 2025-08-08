@@ -1,0 +1,73 @@
+//调试脚本
+{
+    "configurations": [
+        {
+            "name": "Debug with CMSIS-DAP-link",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/Debug/${workspaceRootFolderName}.elf", //将工程根目录名称作为可执行文件名称
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F407IGHx",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/stm32f4x.cfg"
+            ],
+            "svdFile": "./STM32F407.svd",//选择寄存器文件
+            "liveWatch": {//变量窗口激活和设置每秒的采样次数
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+            "searchDir": [],
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "none",
+            "preLaunchTask": "flash with cmsis-dap-link"//每次调试之前会先下载程序
+        },
+        {
+            "name": "Debug with ST-link",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/Debug/${workspaceRootFolderName}.elf",//将工程根目录名称作为可执行文件名称
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F407IGHx",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32f4x.cfg"
+            ],
+            "svdFile": "./STM32F407.svd",
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+            "searchDir": [],
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "none",
+            "preLaunchTask": "flash with ST-link"
+        },
+        {
+            "name": "Debug with J-link",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/Debug/${workspaceRootFolderName}.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F103C8T6",
+            "configFiles": [
+                "interface/jlink-swd.cfg",
+                "target/stm32f4x.cfg"
+            ],
+            "interface": "swd",
+            "svdFile": "./STM32F401.svd",
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+            "runToEntryPoint": "main",
+            "showDevDebugTimestamps": true,
+            "showDevDebugOutput": "none",
+            "preLaunchTask": "flash with J-link"
+        },
+    ],
+    "version": "2.0.0"
+}
