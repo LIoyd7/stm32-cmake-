@@ -26,6 +26,7 @@
             VSCode C/C++ IntelliSense插件会自动索引arm-none-eabi-gcc.exe所在路径，故无需在此填写完整路径。
             */
            //"compilerPath": "D:/Develop/toolchain/arm-gnu-toolchain-14.3.rel1-mingw-w64-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc.exe",
+           //无需替换自己路径,自动寻找
             "compilerPath": "arm-none-eabi-gcc",
             "compilerArgs": [
                 "-mcpu=cortex-m4",
