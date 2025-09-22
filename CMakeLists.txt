@@ -1,79 +1,101 @@
+# 适合STM32 HAL库 + FreeRTOS的CMakeLists.txt模板
+
 cmake_minimum_required(VERSION 3.22)
 
-#
-# This file is generated only once,
-# and is not re-generated if converter is called multiple times.
-#
-# User is free to modify the file as much as necessary
-#
+# 指定交叉编译工具链
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_VERSION 1)
 
-# Setup compiler settings
+set(CMAKE_C_COMPILER arm-none-eabi-gcc)
+set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
+set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
+set(CMAKE_AR arm-none-eabi-ar)
+set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
+set(CMAKE_OBJDUMP arm-none-eabi-objdump)
+set(CMAKE_SIZE arm-none-eabi-size)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+# 工程设置
+project(tree_cmake C CXX ASM)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON)
+set(CMAKE_CXX_STANDARD 17)
 
+# 编译选项
+add_compile_options(-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16)
+add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 
-# Define the build type
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-    set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-    set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
-    set(CMAKE_AR arm-none-eabi-ar)
-    set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
-    set(CMAKE_OBJDUMP arm-none-eabi-objdump)
-    set(CMAKE_SIZE arm-none-eabi-size)
-    set(CMAKE_READELF arm-none-eabi-readelf)
-    set(CMAKE_NM arm-none-eabi-nm)
-    #set(CMAKE_BUILD_TYPE "Debug")
-    # 链接的类型设置为STATIC, 以便嵌入式ARM-GNU通过CMake的"编译器检查"
-    set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+# 优化等级
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    add_compile_options(-Ofast)
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    add_compile_options(-Ofast -g)
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
+    add_compile_options(-Os)
+else ()
+    add_compile_options(-Og -g)
+endif ()
+
+# 宏定义
+add_definitions(
+    -DUSE_HAL_DRIVER
+    -DSTM32F407xx
+    -DFREERTOS
+)
+
+# 头文件路径
+include_directories(
+    ./Core/Inc
+    ./Drivers/STM32F4xx_HAL_Driver/Inc
+    ./Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
+    ./Drivers/CMSIS/Device/ST/STM32F4xx/Include
+    ./Drivers/CMSIS/Include
+    ./Middlewares/Third_Party/FreeRTOS/Source/include
+    ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS
+    ./User
+)
+
+# 源文件收集
+file(GLOB_RECURSE USER_SOURCES
+    "Core/Src/*.c"
+    "User/*.c"
+    "User/*.cpp"
+)
+file(GLOB_RECURSE HAL_SOURCES
+    "Drivers/STM32F4xx_HAL_Driver/Src/*.c"
+)
+file(GLOB_RECURSE FREERTOS_SOURCES
+    "Middlewares/Third_Party/FreeRTOS/Source/*.c"
+    "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/*.c"
+)
+
+set(ALL_SOURCES
+    ${USER_SOURCES}
+    ${HAL_SOURCES}
+    ${FREERTOS_SOURCES}
+)
+
+# 链接脚本
+set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F407XX_FLASH.ld)
+
+add_link_options(
+    -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
+    -Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map
+    -u _printf_float
+)
+
+# 生成可执行文件
+if(ALL_SOURCES)
+    add_executable(${PROJECT_NAME}.elf ${ALL_SOURCES})
+else()
+    message(FATAL_ERROR "No source files found for target ${PROJECT_NAME}.elf")
 endif()
 
-# Set the project name
-set(CMAKE_PROJECT_NAME cmaketest)
+# 生成hex和bin文件
+set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
+set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
 
-# Enable compile command to ease indexing with e.g. clangd
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-
-# Core project settings
-project(${CMAKE_PROJECT_NAME})
-message("Build type: " ${CMAKE_BUILD_TYPE})
-
-# Enable CMake support for ASM and C languages
-enable_language(C CXX ASM)
-
-# Create an executable object type
-add_executable(${CMAKE_PROJECT_NAME})
-
-# Add STM32CubeMX generated sources
-add_subdirectory(cmake/stm32cubemx)
-
-# Link directories setup
-target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined library search paths
-)
-
-# Add sources to executable
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user sources here
-)
-
-# Add include paths
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined include paths
-)
-
-# Add project symbols (macros)
-target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined symbols
-)
-
-# Remove wrong libob.a library dependency when using cpp files
-list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
-
-# Add linked libraries
-target_link_libraries(${CMAKE_PROJECT_NAME}
-    stm32cubemx
-
-    # Add user defined libraries
+add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+    COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+    COMMENT "生成HEX和BIN文件"
 )
