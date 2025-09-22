@@ -67,11 +67,13 @@ file(GLOB_RECURSE FREERTOS_SOURCES
     "Middlewares/Third_Party/FreeRTOS/Source/*.c"
     "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/*.c"
 )
+file(GLOB STARTUP_SOURCES "Core/Startup/*.s")
 
 set(ALL_SOURCES
     ${USER_SOURCES}
     ${HAL_SOURCES}
     ${FREERTOS_SOURCES}
+    ${STARTUP_SOURCES}
 )
 
 # 链接脚本
