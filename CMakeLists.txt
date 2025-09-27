@@ -16,7 +16,7 @@ set(CMAKE_SIZE arm-none-eabi-size)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # 工程设置
-project(tree_cmake C CXX ASM)
+project(cmaketest C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -67,7 +67,7 @@ file(GLOB_RECURSE FREERTOS_SOURCES
     "Middlewares/Third_Party/FreeRTOS/Source/*.c"
     "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/*.c"
 )
-file(GLOB STARTUP_SOURCES "Core/Startup/*.s")
+file(GLOB STARTUP_SOURCES "*.s")
 
 set(ALL_SOURCES
     ${USER_SOURCES}
@@ -87,17 +87,18 @@ add_link_options(
 
 # 生成可执行文件
 if(ALL_SOURCES)
-    add_executable(${PROJECT_NAME}.elf ${ALL_SOURCES})
+    add_executable(${PROJECT_NAME} ${ALL_SOURCES})
 else()
-    message(FATAL_ERROR "No source files found for target ${PROJECT_NAME}.elf")
+    message(FATAL_ERROR "No source files found for target ${PROJECT_NAME}")
 endif()
 
 # 生成hex和bin文件
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
 
-add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-    COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}> ${HEX_FILE}
+    COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}> ${BIN_FILE}
     COMMENT "生成HEX和BIN文件"
 )
+# ...existing code...
